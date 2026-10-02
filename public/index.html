@@ -5,11 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Анонимные идеи EchoVault</title>
 <style>
-  * { box-sizing: border-box; }
+   * { box-sizing: border-box; }
+  html, body {
+    min-height: 100%;
+  }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     max-width: 700px; margin: 0 auto; padding: 20px;
-    background: #f5f7fa; color: #1a1a1a;
+    color: #1a1a1a;
+    background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80') center/cover no-repeat fixed;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(245, 247, 250, 0.82);
+    z-index: -1;
+  }
+  @media (max-width: 768px) {
+    body {
+      background-attachment: scroll;
+    }
   }
   h1 { font-size: 1.5rem; margin-bottom: 4px; }
   .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
