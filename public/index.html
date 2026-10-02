@@ -23,21 +23,70 @@
     font-family: inherit; font-size: 1rem; resize: vertical;
   }
   textarea:focus { outline: 2px solid #4f46e5; border-color: transparent; }
-  button {
+  .tags-row {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+  }
+  .tag-btn {
+    padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd;
+    background: #fff; cursor: pointer; font-size: 0.9rem;
+    transition: all 0.15s;
+  }
+  .tag-btn:hover { border-color: #4f46e5; }
+  .tag-btn.active {
+    background: #4f46e5; color: #fff; border-color: #4f46e5;
+  }
+  button.send {
     background: #4f46e5; color: #fff; border: none;
     padding: 12px 24px; border-radius: 8px; font-size: 1rem;
-    font-weight: 600; cursor: pointer; margin-top: 10px;
+    font-weight: 600; cursor: pointer; margin-top: 12px;
   }
-  button:hover { background: #4338ca; }
-  button:disabled { background: #aaa; cursor: not-allowed; }
+  button.send:hover { background: #4338ca; }
+  button.send:disabled { background: #aaa; cursor: not-allowed; }
+  .status { font-size: 0.85rem; color: #666; margin-top: 6px; }
+  .filters {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .filters button {
+    padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd;
+    background: #fff; cursor: pointer; font-size: 0.85rem;
+  }
+  .filters button.active {
+    background: #1a1a1a; color: #fff; border-color: #1a1a1a;
+  }
   .idea {
     background: #fff; border-radius: 12px; padding: 16px 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 12px;
     white-space: pre-wrap; word-wrap: break-word;
   }
-  .idea .meta { color: #999; font-size: 0.8rem; margin-top: 8px; }
+  .idea-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+  }
+  .badge {
+    font-size: 0.75rem; padding: 3px 10px; border-radius: 12px;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .badge.idea { background: #e0e7ff; color: #3730a3; }
+  .badge.problem { background: #fee2e2; color: #991b1b; }
+  .badge.question { background: #fef3c7; color: #92400e; }
+  .badge.other { background: #e5e7eb; color: #374151; }
+  .idea-text { font-size: 1rem; line-height: 1.5; }
+  .idea-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 12px; padding-top: 10px; border-top: 1px solid #f0f0f0;
+  }
+  .meta { color: #999; font-size: 0.8rem; }
+  .like-btn {
+    background: #f3f4f6; border: none; padding: 6px 14px;
+    border-radius: 20px; cursor: pointer; font-size: 0.9rem;
+    display: flex; align-items: center; gap: 6px;
+    transition: background 0.15s;
+  }
+  .like-btn:hover { background: #e5e7eb; }
+  .like-btn.liked {
+    background: #4f46e5; color: #fff; cursor: default;
+  }
+  .like-btn.liked:hover { background: #4f46e5; }
   .empty { text-align: center; color: #999; padding: 40px 0; }
-  .status { font-size: 0.85rem; color: #666; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -46,8 +95,22 @@
 
 <div class="card">
   <textarea id="ideaInput" placeholder="Ваша идея или предложение..."></textarea>
-  <button id="sendBtn" onclick="sendIdea()">Отправить анонимно</button>
+  <div class="tags-row" id="tagRow">
+    <button class="tag-btn active" data-tag="idea">💡 Идея</button>
+    <button class="tag-btn" data-tag="problem">⚠️ Проблема</button>
+    <button class="tag-btn" data-tag="question">❓ Вопрос</button>
+    <button class="tag-btn" data-tag="other">💬 Другое</button>
+  </div>
+  <button class="send" id="sendBtn" onclick="sendIdea()">Отправить анонимно</button>
   <div class="status" id="status"></div>
+</div>
+
+<div class="filters" id="filters">
+  <button class="active" data-filter="">Все</button>
+  <button data-filter="idea">💡 Идеи</button>
+  <button data-filter="problem">⚠️ Проблемы</button>
+  <button data-filter="question">❓ Вопросы</button>
+  <button data-filter="other">💬 Другое</button>
 </div>
 
 <div id="ideasList"></div>
@@ -57,34 +120,105 @@
   const btn = document.getElementById('sendBtn');
   const status = document.getElementById('status');
   const list = document.getElementById('ideasList');
+  const filters = document.getElementById('filters');
+
+  let selectedTag = 'idea';
+  let currentFilter = '';
+
+  const TAG_LABELS = {
+    idea: '💡 Идея',
+    problem: '⚠️ Проблема',
+    question: '❓ Вопрос',
+    other: '💬 Другое'
+  };
+
+  // Выбор тега при отправке
+  document.getElementById('tagRow').addEventListener('click', e => {
+    if (!e.target.classList.contains('tag-btn')) return;
+    document.querySelectorAll('#tagRow .tag-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedTag = e.target.dataset.tag;
+  });
+
+  // Фильтры
+  filters.addEventListener('click', e => {
+    if (e.target.tagName !== 'BUTTON') return;
+    document.querySelectorAll('#filters button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentFilter = e.target.dataset.filter;
+    loadIdeas();
+  });
+
+  // Получаем список лайкнутых из localStorage
+  function getLiked() {
+    try { return JSON.parse(localStorage.getItem('liked') || '[]'); }
+    catch { return []; }
+  }
+  function setLiked(arr) {
+    localStorage.setItem('liked', JSON.stringify(arr));
+  }
 
   async function loadIdeas() {
-    const res = await fetch('/api/ideas');
+    const url = currentFilter ? `/api/ideas?tag=${currentFilter}` : '/api/ideas';
+    const res = await fetch(url);
     const data = await res.json();
+
     if (!data.length) {
       list.innerHTML = '<div class="empty">Пока идей нет. Будьте первым!</div>';
       return;
     }
-    list.innerHTML = data.map(i => `
-      <div class="idea">
-        ${escapeHtml(i.text)}
-        <div class="meta">${new Date(i.created_at).toLocaleString('ru-RU')}</div>
-      </div>
-    `).join('');
+
+    const liked = getLiked();
+
+    list.innerHTML = data.map(i => {
+      const isLiked = liked.includes(i.id);
+      return `
+        <div class="idea">
+          <div class="idea-head">
+            <span class="badge ${i.tag}">${TAG_LABELS[i.tag] || i.tag}</span>
+          </div>
+          <div class="idea-text">${escapeHtml(i.text)}</div>
+          <div class="idea-foot">
+            <span class="meta">${new Date(i.created_at).toLocaleString('ru-RU')}</span>
+            <button class="like-btn ${isLiked ? 'liked' : ''}"
+                    onclick="likeIdea(${i.id})"
+                    ${isLiked ? 'disabled' : ''}>
+              👍 <span>${i.likes}</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function likeIdea(id) {
+    const liked = getLiked();
+    if (liked.includes(id)) return;
+
+    const res = await fetch(`/api/ideas/${id}/like`, { method: 'POST' });
+    if (!res.ok) return;
+
+    liked.push(id);
+    setLiked(liked);
+    loadIdeas();
   }
 
   async function sendIdea() {
     const text = input.value.trim();
     if (!text) { status.textContent = 'Напишите что-нибудь.'; return; }
     btn.disabled = true; status.textContent = 'Отправка...';
+
     const res = await fetch('/api/ideas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text, tag: selectedTag })
     });
+
     btn.disabled = false;
     if (!res.ok) { status.textContent = 'Ошибка'; return; }
-    input.value = ''; status.textContent = 'Отправлено ✅';
+
+    input.value = '';
+    status.textContent = 'Отправлено ✅';
     setTimeout(() => status.textContent = '', 2000);
     loadIdeas();
   }
