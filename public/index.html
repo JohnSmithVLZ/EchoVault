@@ -487,36 +487,6 @@
     }
 
     const liked = getLiked();
-
-    // === УМНОЕ ОБНОВЛЕНИЕ ===
-    // Если пусто (было "Пока идей нет") — рисуем всё заново
-    if (list.querySelector('.empty')) {
-      list.innerHTML = data.map(i => renderIdea(i, liked)).join('');
-      return;
-    }
-
-    const existingCards = list.querySelectorAll('.idea');
-    const existingIds = Array.from(existingCards).map(el => el.dataset.id);
-    const newIds = data.map(i => String(i.id));
-
-    // Если состав карточек совпадает — обновляем только лайки, без перерисовки
-    const sameSet =
-      existingIds.length === newIds.length &&
-      existingIds.every((id, idx) => id === newIds[idx]);
-
-    if (sameSet) {
-      data.forEach(i => {
-        const card = list.querySelector(`.idea[data-id="${i.id}"]`);
-        if (!card) return;
-        const likeSpan = card.querySelector('.like-btn span');
-        if (likeSpan && likeSpan.textContent !== String(i.likes)) {
-          likeSpan.textContent = i.likes;
-        }
-      });
-      return;
-    }
-
-    // Если состав изменился — перерисовываем полностью
     list.innerHTML = data.map(i => renderIdea(i, liked)).join('');
   }
 
@@ -557,7 +527,6 @@
   }
 
   loadIdeas();
-  setInterval(loadIdeas, 15000);
 </script>
 </body>
 </html>
