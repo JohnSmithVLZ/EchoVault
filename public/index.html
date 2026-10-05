@@ -406,12 +406,12 @@
   for (let i = 0; i < STAR_COUNT; i++) {
     const star = document.createElement('div');
     star.className = 'star';
-    const size = Math.random() * 2.5 + 1; // 1-3.5px
+    const size = Math.random() * 2.5 + 1;
     star.style.width = size + 'px';
     star.style.height = size + 'px';
     star.style.left = Math.random() * 100 + 'vw';
     star.style.top = Math.random() * 100 + 'vh';
-    star.style.animationDuration = (Math.random() * 3 + 2) + 's'; // 2-5s
+    star.style.animationDuration = (Math.random() * 3 + 2) + 's';
     star.style.animationDelay = (Math.random() * 4) + 's';
     document.body.appendChild(star);
   }
@@ -454,6 +454,27 @@
   }
   function setLiked(arr) { localStorage.setItem('liked', JSON.stringify(arr)); }
 
+  // Рендер одной карточки
+  function renderIdea(i, liked) {
+    const isLiked = liked.includes(i.id);
+    return `
+      <div class="idea" data-id="${i.id}">
+        <div class="idea-head">
+          <span class="badge ${i.tag}">${TAG_LABELS[i.tag] || i.tag}</span>
+        </div>
+        <div class="idea-text">${escapeHtml(i.text)}</div>
+        <div class="idea-foot">
+          <span class="meta">${new Date(i.created_at).toLocaleString('ru-RU')}</span>
+          <button class="like-btn ${isLiked ? 'liked' : ''}"
+                  onclick="likeIdea(${i.id})"
+                  ${isLiked ? 'disabled' : ''}>
+            👍 <span>${i.likes}</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   async function loadIdeas() {
     const url = currentFilter ? `/api/ideas?tag=${currentFilter}` : '/api/ideas';
     const res = await fetch(url);
@@ -466,25 +487,36 @@
 
     const liked = getLiked();
 
-    list.innerHTML = data.map(i => {
-      const isLiked = liked.includes(i.id);
-      return `
-        <div class="idea">
-          <div class="idea-head">
-            <span class="badge ${i.tag}">${TAG_LABELS[i.tag] || i.tag}</span>
-          </div>
-          <div class="idea-text">${escapeHtml(i.text)}</div>
-          <div class="idea-foot">
-            <span class="meta">${new Date(i.created_at).toLocaleString('ru-RU')}</span>
-            <button class="like-btn ${isLiked ? 'liked' : ''}"
-                    onclick="likeIdea(${i.id})"
-                    ${isLiked ? 'disabled' : ''}>
-              👍 <span>${i.likes}</span>
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
+    // === УМНОЕ ОБНОВЛЕНИЕ ===
+    // Если пусто (было "Пока идей нет") — рисуем всё заново
+    if (list.querySelector('.empty')) {
+      list.innerHTML = data.map(i => renderIdea(i, liked)).join('');
+      return;
+    }
+
+    const existingCards = list.querySelectorAll('.idea');
+    const existingIds = Array.from(existingCards).map(el => el.dataset.id);
+    const newIds = data.map(i => String(i.id));
+
+    // Если состав карточек совпадает — обновляем только лайки, без перерисовки
+    const sameSet =
+      existingIds.length === newIds.length &&
+      existingIds.every((id, idx) => id === newIds[idx]);
+
+    if (sameSet) {
+      data.forEach(i => {
+        const card = list.querySelector(`.idea[data-id="${i.id}"]`);
+        if (!card) return;
+        const likeSpan = card.querySelector('.like-btn span');
+        if (likeSpan && likeSpan.textContent !== String(i.likes)) {
+          likeSpan.textContent = i.likes;
+        }
+      });
+      return;
+    }
+
+    // Если состав изменился — перерисовываем полностью
+    list.innerHTML = data.map(i => renderIdea(i, liked)).join('');
   }
 
   async function likeIdea(id) {
