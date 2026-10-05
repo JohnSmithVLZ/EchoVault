@@ -11,40 +11,40 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #1a1a1a;
-    padding: 32px 20px 60px;
-    max-width: 760px;
+    color: #e8eaf6;
+    padding: 32px 20px 260px;
+    max-width: 1100px;
     margin: 0 auto;
     position: relative;
     overflow-x: hidden;
+    min-height: 100vh;
   }
 
-  /* === СМЕНЯЮЩИЕСЯ ФОНЫ === */
-  .bg-layer {
-    position: fixed;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0;
-    transition: opacity 2.5s ease-in-out;
-    z-index: -2;
-  }
-  .bg-layer.active { opacity: 1; }
-
-  /* Полупрозрачная плёнка поверх фона для читаемости */
+  /* === КОСМИЧЕСКИЙ ФОН === */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(245, 247, 250, 0.78) 0%,
-      rgba(245, 247, 250, 0.88) 60%,
-      rgba(245, 247, 250, 0.95) 100%
-    );
-    z-index: -1;
-    backdrop-filter: blur(2px);
+    background:
+      linear-gradient(180deg, rgba(5, 8, 20, 0.55) 0%, rgba(10, 12, 30, 0.75) 100%),
+      url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80') center/cover no-repeat;
+    z-index: -3;
+  }
+
+  /* === ЗВЁЗДЫ === */
+  .star {
+    position: fixed;
+    background: #fff;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -2;
+    animation: twinkle linear infinite;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.1; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
   }
 
   /* === ЗАГОЛОВОК === */
@@ -52,6 +52,8 @@
     text-align: center;
     margin-bottom: 36px;
     animation: fadeDown 0.8s ease-out;
+    position: relative;
+    z-index: 2;
   }
 
   @keyframes fadeDown {
@@ -60,183 +62,101 @@
   }
 
   .logo {
-    font-size: clamp(2.4rem, 7vw, 3.6rem);
+    font-size: clamp(2.6rem, 7vw, 4rem);
     font-weight: 900;
     letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f5576c 100%);
+    background: linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 50%, #f0abfc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height: 1.05;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.25));
+    margin-bottom: 10px;
+    filter: drop-shadow(0 4px 20px rgba(165, 180, 252, 0.4));
   }
 
   .subtitle-header {
-    font-size: clamp(0.85rem, 2.2vw, 1rem);
-    color: #4a5568;
+    font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+    color: #c7d2fe;
     font-weight: 500;
     letter-spacing: 0.01em;
     line-height: 1.5;
   }
 
   .subtitle-header strong {
-    color: #667eea;
+    color: #f0abfc;
     font-weight: 700;
   }
 
-  /* === СТЕКЛЯННЫЕ КАРТОЧКИ === */
-  .card, .idea, .filters {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+  /* === СТЕКЛЯННЫЕ ЭЛЕМЕНТЫ === */
+  .card, .idea, .filters, .composer {
+    background: rgba(20, 22, 45, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(165, 180, 252, 0.18);
     border-radius: 20px;
     box-shadow:
-      0 8px 32px rgba(31, 38, 135, 0.12),
-      0 2px 8px rgba(0, 0, 0, 0.04);
-  }
-
-  .card {
-    padding: 24px;
-    margin-bottom: 20px;
-    animation: fadeUp 0.6s ease-out;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* === ПОЛЕ ВВОДА === */
-  textarea {
-    width: 100%;
-    min-height: 110px;
-    padding: 16px 18px;
-    border: 2px solid rgba(102, 126, 234, 0.15);
-    border-radius: 14px;
-    font-family: inherit;
-    font-size: 1rem;
-    line-height: 1.5;
-    resize: vertical;
-    background: rgba(255, 255, 255, 0.7);
-    transition: all 0.25s ease;
-    color: #1a1a1a;
-  }
-  textarea::placeholder { color: #94a3b8; }
-  textarea:focus {
-    outline: none;
-    border-color: #667eea;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
-  }
-
-  /* === ТЕГИ ПРИ ОТПРАВКЕ === */
-  .tags-row {
-    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px;
-  }
-
-  .tag-btn {
-    padding: 9px 18px;
-    border-radius: 24px;
-    border: 2px solid rgba(102, 126, 234, 0.18);
-    background: rgba(255, 255, 255, 0.6);
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #4a5568;
-    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-    font-family: inherit;
-  }
-  .tag-btn:hover {
-    border-color: #667eea;
-    color: #667eea;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.18);
-  }
-  .tag-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-  }
-
-  /* === ГЛАВНАЯ КНОПКА === */
-  button.send {
-    width: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    border: none;
-    padding: 16px 32px;
-    border-radius: 14px;
-    font-size: 1.05rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 16px;
-    letter-spacing: 0.02em;
-    transition: all 0.25s ease;
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
-    font-family: inherit;
-    position: relative;
-    overflow: hidden;
-  }
-  button.send:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
-  }
-  button.send:active:not(:disabled) {
-    transform: translateY(0);
-  }
-  button.send:disabled {
-    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  .status {
-    font-size: 0.88rem; color: #4a5568; margin-top: 10px;
-    text-align: center; min-height: 20px; font-weight: 500;
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   /* === ФИЛЬТРЫ === */
   .filters {
     display: flex; gap: 8px; flex-wrap: wrap;
-    padding: 10px; margin-bottom: 20px;
+    padding: 10px; margin-bottom: 24px;
+    position: relative; z-index: 2;
+    justify-content: center;
   }
   .filters button {
-    padding: 8px 16px;
+    padding: 9px 18px;
     border-radius: 20px;
     border: none;
     background: transparent;
     cursor: pointer;
     font-size: 0.88rem;
     font-weight: 600;
-    color: #4a5568;
+    color: #c7d2fe;
     transition: all 0.22s ease;
     font-family: inherit;
   }
   .filters button:hover {
-    background: rgba(102, 126, 234, 0.12);
-    color: #667eea;
+    background: rgba(165, 180, 252, 0.15);
+    color: #fff;
   }
   .filters button.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
     color: #fff;
-    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+    box-shadow: 0 4px 18px rgba(139, 92, 246, 0.5);
   }
 
-  /* === КАРТОЧКА ИДЕИ === */
+  /* === СЕТКА ИДЕЙ (ПЛИТКА) === */
+  #ideasList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 18px;
+    position: relative;
+    z-index: 2;
+    margin-bottom: 24px;
+  }
+
   .idea {
     padding: 20px 22px;
-    margin-bottom: 14px;
     animation: fadeUp 0.5s ease-out;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    display: flex;
+    flex-direction: column;
   }
   .idea:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
+    border-color: rgba(165, 180, 252, 0.4);
     box-shadow:
-      0 14px 40px rgba(31, 38, 135, 0.16),
-      0 4px 12px rgba(0, 0, 0, 0.06);
+      0 16px 40px rgba(99, 102, 241, 0.25),
+      0 0 0 1px rgba(165, 180, 252, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .idea-head {
@@ -248,81 +168,202 @@
     font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
   }
   .badge.idea {
-    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-    color: #3730a3;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #e0e7ff;
   }
   .badge.problem {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    color: #991b1b;
+    background: linear-gradient(135deg, #dc2626 0%, #f43f5e 100%);
+    color: #fee2e2;
   }
   .badge.question {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    color: #92400e;
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    color: #fef3c7;
   }
   .badge.other {
-    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-    color: #374151;
+    background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+    color: #e2e8f0;
   }
 
   .idea-text {
-    font-size: 1.02rem; line-height: 1.6; color: #1a1a1a;
+    font-size: 1rem; line-height: 1.6; color: #e8eaf6;
     white-space: pre-wrap; word-wrap: break-word;
+    flex: 1;
   }
 
   .idea-foot {
     display: flex; justify-content: space-between; align-items: center;
     margin-top: 16px; padding-top: 14px;
-    border-top: 1px solid rgba(102, 126, 234, 0.1);
+    border-top: 1px solid rgba(165, 180, 252, 0.12);
+    gap: 8px;
   }
 
-  .meta { color: #94a3b8; font-size: 0.8rem; font-weight: 500; }
+  .meta { color: #94a3b8; font-size: 0.78rem; font-weight: 500; }
 
   .like-btn {
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(165, 180, 252, 0.12);
     border: 2px solid transparent;
     padding: 8px 16px;
     border-radius: 22px;
     cursor: pointer;
     font-size: 0.92rem;
     font-weight: 700;
-    color: #667eea;
+    color: #c7d2fe;
     display: flex; align-items: center; gap: 6px;
     transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     font-family: inherit;
   }
   .like-btn:hover:not(:disabled) {
-    background: rgba(102, 126, 234, 0.18);
-    transform: translateY(-2px) scale(1.04);
+    background: rgba(165, 180, 252, 0.22);
+    transform: translateY(-2px) scale(1.05);
   }
   .like-btn.liked {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
     color: #fff;
     cursor: default;
-    border-color: transparent;
-    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
   }
   .like-btn.liked:hover {
     transform: none;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
   }
 
   .empty {
-    text-align: center; color: #64748b; padding: 60px 20px;
+    grid-column: 1 / -1;
+    text-align: center; color: #c7d2fe; padding: 60px 20px;
     font-size: 1rem; font-weight: 500;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px);
+    background: rgba(20, 22, 45, 0.5);
+    backdrop-filter: blur(12px);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(165, 180, 252, 0.18);
   }
 
-  /* === МОБИЛЬНАЯ АДАПТАЦИЯ === */
-  @media (max-width: 600px) {
-    body { padding: 20px 14px 40px; }
-    .card { padding: 18px; border-radius: 18px; }
-    .idea { padding: 16px 18px; }
+  /* === ФОРМА ВНИЗУ (ЗАКРЕПЛЁННАЯ) === */
+  .composer {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 1060px;
+    padding: 18px 22px;
+    z-index: 100;
+    animation: slideUp 0.6s ease-out;
+    box-shadow:
+      0 -8px 40px rgba(0, 0, 0, 0.5),
+      0 8px 32px rgba(99, 102, 241, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translate(-50%, 30px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 60px;
+    max-height: 180px;
+    padding: 14px 18px;
+    border: 2px solid rgba(165, 180, 252, 0.2);
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: none;
+    background: rgba(10, 12, 30, 0.6);
+    transition: all 0.25s ease;
+    color: #e8eaf6;
+  }
+  textarea::placeholder { color: #818cf8; }
+  textarea:focus {
+    outline: none;
+    border-color: #a5b4fc;
+    background: rgba(10, 12, 30, 0.85);
+    box-shadow: 0 0 0 4px rgba(165, 180, 252, 0.15);
+  }
+
+  .composer-row {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin-top: 12px;
+    align-items: center;
+  }
+
+  .tags-row {
+    display: flex; gap: 8px; flex-wrap: wrap; flex: 1;
+  }
+
+  .tag-btn {
+    padding: 8px 16px;
+    border-radius: 22px;
+    border: 2px solid rgba(165, 180, 252, 0.2);
+    background: rgba(10, 12, 30, 0.5);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #c7d2fe;
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .tag-btn:hover {
+    border-color: #a5b4fc;
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .tag-btn.active {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+  }
+
+  button.send {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 14px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.45);
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  button.send:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(139, 92, 246, 0.6);
+  }
+  button.send:active:not(:disabled) { transform: translateY(0); }
+  button.send:disabled {
+    background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .status {
+    font-size: 0.85rem; color: #c7d2fe; margin-top: 8px;
+    text-align: center; min-height: 18px; font-weight: 500;
+  }
+
+  /* === МОБИЛЬНАЯ === */
+  @media (max-width: 700px) {
+    body { padding: 20px 14px 300px; }
+    .composer {
+      width: calc(100% - 20px);
+      bottom: 10px;
+      padding: 14px;
+      max-height: 45vh;
+      overflow-y: auto;
+    }
+    .composer-row { flex-direction: column; align-items: stretch; }
+    .tags-row { justify-content: center; }
+    button.send { width: 100%; }
+    #ideasList { grid-template-columns: 1fr; }
     .filters { padding: 8px; }
-    .filters button { padding: 7px 12px; font-size: 0.82rem; }
-    .tag-btn { padding: 8px 14px; font-size: 0.85rem; }
+    .filters button { padding: 7px 12px; font-size: 0.8rem; }
   }
 </style>
 </head>
@@ -335,18 +376,6 @@
   </div>
 </header>
 
-<div class="card">
-  <textarea id="ideaInput" placeholder="Поделитесь идеей, проблемой или вопросом..."></textarea>
-  <div class="tags-row" id="tagRow">
-    <button class="tag-btn active" data-tag="idea">💡 Идея</button>
-    <button class="tag-btn" data-tag="problem">⚠️ Проблема</button>
-    <button class="tag-btn" data-tag="question">❓ Вопрос</button>
-    <button class="tag-btn" data-tag="other">💬 Другое</button>
-  </div>
-  <button class="send" id="sendBtn" onclick="sendIdea()">Отправить анонимно</button>
-  <div class="status" id="status"></div>
-</div>
-
 <div class="filters" id="filters">
   <button class="active" data-filter="">Все</button>
   <button data-filter="idea">💡 Идеи</button>
@@ -357,33 +386,35 @@
 
 <div id="ideasList"></div>
 
+<div class="composer">
+  <textarea id="ideaInput" placeholder="Поделитесь идеей, проблемой или вопросом..."></textarea>
+  <div class="composer-row">
+    <div class="tags-row" id="tagRow">
+      <button class="tag-btn active" data-tag="idea">💡 Идея</button>
+      <button class="tag-btn" data-tag="problem">⚠️ Проблема</button>
+      <button class="tag-btn" data-tag="question">❓ Вопрос</button>
+      <button class="tag-btn" data-tag="other">💬 Другое</button>
+    </div>
+    <button class="send" id="sendBtn" onclick="sendIdea()">Отправить</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
 <script>
-  // === СМЕНА ФОНОВ ===
-  const BACKGROUNDS = [
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80', // горы
-    'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1920&q=80', // озеро и горы
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80', // лес
-    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80', // туманный лес
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80', // пляж
-    'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920&q=80'  // поле
-  ];
-
-  const bgLayers = [];
-  let currentBg = 0;
-
-  BACKGROUNDS.forEach((url, i) => {
-    const layer = document.createElement('div');
-    layer.className = 'bg-layer' + (i === 0 ? ' active' : '');
-    layer.style.backgroundImage = `url('${url}')`;
-    document.body.appendChild(layer);
-    bgLayers.push(layer);
-  });
-
-  setInterval(() => {
-    bgLayers[currentBg].classList.remove('active');
-    currentBg = (currentBg + 1) % bgLayers.length;
-    bgLayers[currentBg].classList.add('active');
-  }, 12000);
+  // === ЗВЁЗДЫ ===
+  const STAR_COUNT = 70;
+  for (let i = 0; i < STAR_COUNT; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2.5 + 1; // 1-3.5px
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.left = Math.random() * 100 + 'vw';
+    star.style.top = Math.random() * 100 + 'vh';
+    star.style.animationDuration = (Math.random() * 3 + 2) + 's'; // 2-5s
+    star.style.animationDelay = (Math.random() * 4) + 's';
+    document.body.appendChild(star);
+  }
 
   // === ЛОГИКА ===
   const input = document.getElementById('ideaInput');
@@ -429,7 +460,7 @@
     const data = await res.json();
 
     if (!data.length) {
-      list.innerHTML = '<div class="empty">Пока идей нет. Будьте первым!</div>';
+      list.innerHTML = '<div class="empty">Пока идей нет. Будьте первым! ✨</div>';
       return;
     }
 
