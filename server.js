@@ -101,13 +101,25 @@ app.post('/api/logout', auth, async (req, res) => {
 app.get('/api/ideas', auth, async (req, res) => {
   try {
     const tag = req.query.tag;
-    let query = 'SELECT * FROM ideas';
+    const resolvedOnly = req.query.resolved === 'true';
+    const conditions = [];
     const args = [];
+
     if (tag && ALLOWED_TAGS.includes(tag)) {
-      query += ' WHERE tag = $1';
       args.push(tag);
+      conditions.push(`tag = $${args.length}`);
+      // При фильтре по тегу показываем только нерешённые
+      conditions.push(`resolved = false`);
+    } else if (resolvedOnly) {
+      conditions.push(`resolved = true`);
+    }
+
+    let query = 'SELECT * FROM ideas';
+    if (conditions.length) {
+      query += ' WHERE ' + conditions.join(' AND ');
     }
     query += ' ORDER BY resolved ASC, created_at DESC';
+
     const result = await pool.query(query, args);
     res.json(result.rows);
   } catch (err) {
