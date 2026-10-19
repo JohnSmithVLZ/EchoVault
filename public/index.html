@@ -284,6 +284,10 @@
     color: #fff;
     box-shadow: 0 4px 18px rgba(139, 92, 246, 0.5);
   }
+  .filters button.resolved-filter.active {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    box-shadow: 0 4px 18px rgba(34, 197, 94, 0.5);
+  }
 
   /* === СЕТКА === */
   #ideasList {
@@ -505,6 +509,32 @@
     text-align: center; min-height: 18px; font-weight: 500;
   }
 
+  /* === КОТИК === */
+  .kitty {
+    position: fixed;
+    font-size: 42px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 150;
+    user-select: none;
+    text-decoration: none;
+    filter: drop-shadow(0 4px 16px rgba(240, 171, 252, 0.6));
+    transition: transform 0.2s ease;
+    animation: kittyPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: auto;
+  }
+  .kitty:hover { transform: scale(1.25) rotate(-8deg); }
+  .kitty.leaving { animation: kittyLeave 0.5s ease-in forwards; }
+
+  @keyframes kittyPop {
+    from { opacity: 0; transform: scale(0.3) rotate(-20deg); }
+    to { opacity: 1; transform: scale(1) rotate(0); }
+  }
+  @keyframes kittyLeave {
+    from { opacity: 1; transform: scale(1) rotate(0); }
+    to { opacity: 0; transform: scale(0.3) rotate(20deg); }
+  }
+
   .hidden { display: none !important; }
 
   @media (max-width: 700px) {
@@ -521,6 +551,7 @@
     .filters button { padding: 7px 12px; font-size: 0.8rem; }
     .top-bar { top: 10px; right: 10px; flex-direction: column; align-items: flex-end; gap: 6px; }
     .role-badge, .logout-btn { font-size: 0.75rem; padding: 6px 12px; }
+    .kitty { font-size: 34px; }
   }
 </style>
 </head>
@@ -637,7 +668,6 @@
     }
     const res = await fetch(url, options);
     if (res.status === 401) {
-      // Токен недействителен — выходим
       doLocalLogout();
       throw new Error('Требуется вход');
     }
@@ -778,7 +808,7 @@
   }
 
   // === ЗАГРУЗКА ИДЕЙ ===
- async function loadIdeas() {
+  async function loadIdeas() {
     try {
       let url = '/api/ideas';
       if (currentFilter === 'resolved') {
@@ -869,9 +899,60 @@
     }[m]));
   }
 
+  // === КОТИК ===
+  const KITTY_LINK = 'https://johnsmithvlz.itch.io/master-chebupel';
+  const KITTY_EMOJIS = ['🐱', '😺', '😸', '😻', '🐈', '🐈‍⬛'];
+  let kittyTimeout = null;
+
+  function spawnKitty() {
+    if (mainScreen.classList.contains('hidden')) {
+      scheduleKitty();
+      return;
+    }
+
+    document.querySelectorAll('.kitty').forEach(el => el.remove());
+
+    const kitty = document.createElement('a');
+    kitty.className = 'kitty';
+    kitty.href = KITTY_LINK;
+    kitty.target = '_blank';
+    kitty.rel = 'noopener noreferrer';
+    kitty.textContent = KITTY_EMOJIS[Math.floor(Math.random() * KITTY_EMOJIS.length)];
+    kitty.title = 'Мяу! Нажми на меня 🐾';
+
+    const padding = 60;
+    const x = Math.random() * (window.innerWidth - padding * 2) + padding;
+    const y = Math.random() * (window.innerHeight - padding * 2) + padding;
+    kitty.style.left = x + 'px';
+    kitty.style.top = y + 'px';
+
+    kitty.addEventListener('click', () => {
+      kitty.classList.add('leaving');
+      setTimeout(() => kitty.remove(), 500);
+    });
+
+    document.body.appendChild(kitty);
+
+    setTimeout(() => {
+      if (kitty.isConnected) {
+        kitty.classList.add('leaving');
+        setTimeout(() => kitty.remove(), 500);
+      }
+    }, 5000);
+
+    scheduleKitty();
+  }
+
+  function scheduleKitty() {
+    if (kittyTimeout) clearTimeout(kittyTimeout);
+    const delay = 7000 + Math.random() * 8000;
+    kittyTimeout = setTimeout(spawnKitty, delay);
+  }
+
+  scheduleKitty();
+
   // === СТАРТ ===
   if (token && role) {
-    // Проверим, что токен ещё валиден
     (async () => {
       try {
         const res = await fetch('/api/ideas', {
