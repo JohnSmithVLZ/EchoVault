@@ -535,6 +535,97 @@
     to { opacity: 0; transform: scale(0.3) rotate(20deg); }
   }
 
+  /* === МОДАЛЬНОЕ ОКНО С ИГРОЙ === */
+  .game-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: overlayIn 0.3s ease-out;
+  }
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .game-overlay.hidden { display: none; }
+
+  .game-frame-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: 90vh;
+    max-height: 900px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+      0 20px 80px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(165, 180, 252, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: frameIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes frameIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .game-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: #1a0e08;
+  }
+
+  .game-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(20, 22, 45, 0.85);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(165, 180, 252, 0.4);
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.22s ease;
+    font-family: inherit;
+    z-index: 10;
+  }
+  .game-close:hover {
+    background: rgba(220, 38, 38, 0.9);
+    border-color: transparent;
+    transform: scale(1.1) rotate(90deg);
+  }
+
+  .game-title {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(168, 85, 247, 0.9) 100%);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    pointer-events: none;
+  }
+
   .hidden { display: none !important; }
 
   @media (max-width: 700px) {
@@ -552,6 +643,9 @@
     .top-bar { top: 10px; right: 10px; flex-direction: column; align-items: flex-end; gap: 6px; }
     .role-badge, .logout-btn { font-size: 0.75rem; padding: 6px 12px; }
     .kitty { font-size: 16px; }
+    .game-frame-wrapper { height: 85vh; border-radius: 16px; }
+    .game-close { width: 36px; height: 36px; font-size: 18px; top: 8px; right: 8px; }
+    .game-title { font-size: 0.75rem; padding: 6px 12px; top: 8px; left: 8px; }
   }
 </style>
 </head>
@@ -618,6 +712,15 @@
   </div>
 </div>
 
+<!-- === МОДАЛЬНОЕ ОКНО С ИГРОЙ === -->
+<div class="game-overlay hidden" id="gameOverlay">
+  <div class="game-frame-wrapper">
+    <div class="game-title">🐱 Мастер Чебупель</div>
+    <button class="game-close" onclick="closeGame()" title="Закрыть">×</button>
+    <iframe class="game-frame" id="gameFrame" src="about:blank" title="Мастер Чебупель"></iframe>
+  </div>
+</div>
+
 <script>
   // === ЗВЁЗДЫ ===
   const STAR_COUNT = 70;
@@ -658,6 +761,8 @@
   const status = document.getElementById('status');
   const list = document.getElementById('ideasList');
   const filters = document.getElementById('filters');
+  const gameOverlay = document.getElementById('gameOverlay');
+  const gameFrame = document.getElementById('gameFrame');
 
   // === API-ХЕЛПЕР ===
   async function api(url, options = {}) {
@@ -734,6 +839,7 @@
     loginError.textContent = '';
     loginBtn.disabled = false;
     loginBtn.textContent = 'Войти';
+    closeGame();
   }
 
   // === ПОКАЗ ОСНОВНОГО ЭКРАНА ===
@@ -899,24 +1005,47 @@
     }[m]));
   }
 
+  // === ОТКРЫТИЕ / ЗАКРЫТИЕ ИГРЫ ===
+  function openGame() {
+    // Загружаем игру только при открытии (чтобы не тормозить страницу)
+    if (gameFrame.src === 'about:blank' || !gameFrame.src.endsWith('/game.html')) {
+      gameFrame.src = '/game.html';
+    }
+    gameOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeGame() {
+    gameOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // Закрытие по клику на фон
+  gameOverlay.addEventListener('click', e => {
+    if (e.target === gameOverlay) closeGame();
+  });
+
+  // Закрытие по Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !gameOverlay.classList.contains('hidden')) {
+      closeGame();
+    }
+  });
+
   // === КОТИК ===
-  const KITTY_LINK = 'https://johnsmithvlz.itch.io/master-chebupel';
   const KITTY_EMOJIS = ['😺', '😸', '😻'];
   let kittyTimeout = null;
 
-  // Безопасное место: только узкие полосы у левого/правого края,
-  // вне верхней панели и вне нижней формы
   function findSafePosition() {
     const KITTY_SIZE = 24;
-    const EDGE_WIDTH = 70; // ширина полосы у края
-    const TOP_SAFE = 90;   // отступ сверху (под верхнюю панель)
-    const BOTTOM_SAFE = 280; // отступ снизу (под форму)
+    const EDGE_WIDTH = 70;
+    const TOP_SAFE = 90;
+    const BOTTOM_SAFE = 280;
 
     const viewportH = window.innerHeight;
     const viewportW = window.innerWidth;
 
     for (let attempt = 0; attempt < 20; attempt++) {
-      // Случайно левая или правая полоса
       const side = Math.random() < 0.5 ? 'left' : 'right';
       let x;
       if (side === 'left') {
@@ -925,37 +1054,37 @@
         x = viewportW - EDGE_WIDTH + Math.random() * (EDGE_WIDTH - KITTY_SIZE - 10);
       }
 
-      // Случайная высота в безопасной зоне
       const safeTop = TOP_SAFE;
       const safeBottom = viewportH - BOTTOM_SAFE;
       if (safeBottom <= safeTop) continue;
 
       const y = safeTop + Math.random() * (safeBottom - safeTop);
 
-      // Проверяем, что в этой точке нет интерактивного элемента
       const el = document.elementFromPoint(x + KITTY_SIZE / 2, y + KITTY_SIZE / 2);
       if (!el) continue;
 
-      // Если это body/html — значит, свободно
       if (el === document.body || el === document.documentElement) {
         return { x, y };
       }
 
-      // Если попали на .app (контейнер) — тоже ок, если это фон
-      // Но лучше избегать любых кнопок/карточек/полей
-      if (el.closest('button, input, textarea, a, .idea, .composer, .filters, .top-bar, .login-card')) {
-        continue; // пробуем ещё
+      if (el.closest('button, input, textarea, a, .idea, .composer, .filters, .top-bar, .login-card, .game-overlay')) {
+        continue;
       }
 
       return { x, y };
     }
 
-    // Если 20 попыток не удались — не показываем котика в этот раз
     return null;
   }
 
   function spawnKitty() {
     if (mainScreen.classList.contains('hidden')) {
+      scheduleKitty();
+      return;
+    }
+
+    // Не показываем котика, если открыта игра
+    if (!gameOverlay.classList.contains('hidden')) {
       scheduleKitty();
       return;
     }
@@ -968,11 +1097,8 @@
       return;
     }
 
-    const kitty = document.createElement('a');
+    const kitty = document.createElement('div');
     kitty.className = 'kitty';
-    kitty.href = KITTY_LINK;
-    kitty.target = '_blank';
-    kitty.rel = 'noopener noreferrer';
     kitty.textContent = KITTY_EMOJIS[Math.floor(Math.random() * KITTY_EMOJIS.length)];
     kitty.title = 'Мяу! Нажми на меня 🐾';
     kitty.style.left = pos.x + 'px';
@@ -981,6 +1107,7 @@
     kitty.addEventListener('click', () => {
       kitty.classList.add('leaving');
       setTimeout(() => kitty.remove(), 500);
+      openGame();
     });
 
     document.body.appendChild(kitty);
