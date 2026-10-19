@@ -566,6 +566,7 @@
       <button data-filter="problem">⚠️ Проблемы</button>
       <button data-filter="question">❓ Вопросы</button>
       <button data-filter="other">💬 Другое</button>
+      <button data-filter="resolved" class="resolved-filter">✅ Решённые</button>
     </div>
 
     <div id="ideasList"></div>
@@ -777,14 +778,22 @@
   }
 
   // === ЗАГРУЗКА ИДЕЙ ===
-  async function loadIdeas() {
+ async function loadIdeas() {
     try {
-      const url = currentFilter ? `/api/ideas?tag=${currentFilter}` : '/api/ideas';
+      let url = '/api/ideas';
+      if (currentFilter === 'resolved') {
+        url = '/api/ideas?resolved=true';
+      } else if (currentFilter) {
+        url = `/api/ideas?tag=${currentFilter}`;
+      }
+
       const res = await api(url);
       const data = await res.json();
 
       if (!data.length) {
-        list.innerHTML = '<div class="empty">Пока идей нет. Будьте первым! ✨</div>';
+        let emptyMsg = 'Пока идей нет. Будьте первым! ✨';
+        if (currentFilter === 'resolved') emptyMsg = 'Решённых идей пока нет.';
+        list.innerHTML = `<div class="empty">${emptyMsg}</div>`;
         return;
       }
 
